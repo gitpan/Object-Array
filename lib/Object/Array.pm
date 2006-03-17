@@ -12,11 +12,11 @@ Object::Array - array references with accessors
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -160,7 +160,13 @@ sub elem {
   my $idx  = shift || 0;
 
   if (ref $idx eq 'ARRAY') {
-    return $self->_multi_elem($idx, @_);
+    # since tying can deal with this, might as well let it
+    # do so
+    if (@_) {
+      return @{ $self }[ @$idx ] = @{ +shift };
+    } else {
+      return @{ $self }[ @$idx ];
+    }
   }
 
   if (@_) {

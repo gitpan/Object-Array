@@ -1,4 +1,4 @@
-#line 1 "/home/hdp/svk/Object-Array/inc/Module/Install.pm - /icg/lib/perl/5.6.1/Module/Install.pm"
+#line 1 "/home/hdp/svk/Object-Array/trunk/inc/Module/Install.pm - /icg/lib/perl/5.6.1/Module/Install.pm"
 package Module::Install;
 
 use 5.004;

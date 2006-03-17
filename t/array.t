@@ -20,9 +20,18 @@ is_deeply(
   [ [ qw(a b c) ], [ qw(a b c) ] ],
 );
 
-$arr->[3] = "d";
+is_deeply(
+  [ $arr->element([ 1, 2 ]) ],
+  [ qw(b c) ],
+);
+
+$arr->element([ 2, 3 ], [ qw(f d) ]);
+is($arr->[2], 'f');
+
+$arr->[2] = "c";
 
 is $arr->element(3), 'd';
+is $arr->element(2), 'c';
 is $#{$arr}, 3;
 
 is $arr->shift, "a";
