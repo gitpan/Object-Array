@@ -4,6 +4,8 @@ META.yml # Will be created by "make dist"
 Makefile.PL
 README
 lib/Object/Array.pm
+lib/Object/Array/Plugin/Builtins.pm
+lib/Object/Array/Plugin/ListMoreUtils.pm
 t/00-load.t
 t/boilerplate.t
 t/pod-coverage.t

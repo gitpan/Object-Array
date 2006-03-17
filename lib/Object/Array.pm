@@ -4,6 +4,18 @@ use strict;
 use warnings;
 use Scalar::Util ();
 
+use Module::Pluggable::Fast (
+  require => 1,
+);
+
+for my $plugin (__PACKAGE__->plugins) {
+  $plugin->import('-all');
+}
+
+use Sub::Exporter -setup => {
+  exports => [ Array => \&_array_generator ],
+};
+
 use 5.006001;
 
 =head1 NAME
@@ -12,21 +24,48 @@ Object::Array - array references with accessors
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
-  use Object::Array;
-  my $array = Object::Array->new; # or
-  $array = Object::Array->new(\@array);
+  use Object::Array qw(Array);
+  my $array = Object::Array->new;       # or
+  $array = Object::Array->new(\@array); # or
+  $array = Array(\@array);
   $array->push(1..5);
   print $array->shift;
   $_++ for grep { $_ < 4 } @{ $array };
   $array->[0] = "a pony";
+
+=head1 IMPORTANT NOTE
+
+Several of these methods do not behave exactly like their
+builtin counterparts.
+
+Specifically, any method that you would expect to return a
+list does so, but B<only in list context>.  In scalar
+context, these methods will return an Object::Array object
+constructed from a copy of the list that would have been
+returned.
+
+This sounds more complicated than it is.  It means that you
+can chain some methods together, e.g.
+
+  $arr->grep(sub { defined })->[-1];
+
+instead of the more bracing
+
+  ${ $arr->grep(sub { defined }) }[-1];
+
+Currently, these array objects only contain copies of the
+original values.  In the future, they will retain references
+to the original object, and this sort of thing will be possible:
+
+  $arr->grep(sub { defined })->[-1]++;
 
 =head1 METHODS
 
@@ -51,6 +90,17 @@ my %real;
 sub _addr { Scalar::Util::refaddr($_[0]) }
 
 sub _real { $real{shift->_addr} }
+
+sub _array {
+  my ($self, @values) = @_;
+  return wantarray ? @values : ref($self)->new(\@values);
+}
+
+# for exporting
+sub _array_generator {
+  my ($class) = @_;
+  return sub { $class->new(@_) };
+}
   
 sub new {
   my $class = shift;
@@ -65,137 +115,11 @@ sub new {
   return $self;
 }
 
-=head2 C<< size >>
+=head1 SEE ALSO
 
-=head2 C<< length >>
+L<Object::Array::Plugin::Builtins>
 
-Returns the number of elements in the array.
-
-C<< size >> and C<< length >> are synonyms.
-
-=head2 C<< element >>
-
-=head2 C<< elem >>
-
-  print $array->elem(0);
-  print $array->[0];
-
-Get a single element's value.
-
-  $array->elem(1 => "hello");
-  $array->[1] = "hello";
-
-Set a single element's value.
-
-  print for $array->elem([ 0, 1, 2 ]);
-  print for @{$array}[0,1,2];
-
-Get multiple values.
-
-  $array->elem([ 0, 1, 2 ] => [ qw(a b c) ]);
-  @{$array}[0,1,2] = qw(a b c);
-
-Set multiple values.
-
-C<< element >> and C<< elem >> are synonyms.
-
-=head2 C<< elements >>
-
-=head2 C<< elems >>
-
-=head2 C<< all >>
-
-Shortcut for all values in the array.
-
-C<< elements >>, C<< elems >>, and C<< all >> are synonyms.
-
-NOTE: Using methods in a for/map/etc. will not do aliasing
-via $_.  Use array dereferencing if you need to do this, e.g.
-
-  $_++ for @{$array};
-
-=head2 C<< clear >>
-
-Erase the array.  The following all leave the array empty:
-
-  $array->size(0);
-  $array->clear;
-  @{ $array } = ();
-
-=head2 C<< push >>
-
-=head2 C<< pop >>
-
-=head2 C<< shift >>
-
-=head2 C<< unshift >>
-
-=head2 C<< exists >>
-
-=head2 C<< delete >>
-
-=head2 C<< splice >>
-
-As the builtin array operations of the same names.
-
-=cut
-
-sub size {
-  my $self = shift;
-  if (@_) {
-    $#{ $self->_real } = shift(@_) - 1;
-  }
-  return scalar @{ $self->_real };
-}
-
-*length = \*size;
-
-sub elem {
-  my $self = shift;
-  unless (@_) {
-    require Carp;
-    Carp::croak("must specify index for element lookup");
-  }
-
-  my $idx  = shift || 0;
-
-  if (ref $idx eq 'ARRAY') {
-    # since tying can deal with this, might as well let it
-    # do so
-    if (@_) {
-      return @{ $self }[ @$idx ] = @{ +shift };
-    } else {
-      return @{ $self }[ @$idx ];
-    }
-  }
-
-  if (@_) {
-    $self->_real->[$idx] = shift;
-  }
-  return $self->_real->[$idx];
-}
-*element = \&elem;
-
-sub elems   { @{ shift->_real } }
-
-*all = *elements = \&elems;
-
-sub clear   { @{ shift->_real } = () }
-
-sub pop     { pop @{ shift->_real } }
-
-sub push    { push @{ shift->_real }, @_ }
-
-sub unshift { unshift @{ shift->_real }, @_ }
-
-sub exists  { exists shift->_real->[shift] }
-
-sub delete  { delete shift->_real->[shift] }
-
-sub splice  { splice @{ shift->_real }, @_ }
-
-# shift goes last to avoid annoying warnings
-sub shift   { shift @{ shift->_real } }
+L<Object::Array::Plugin::ListMoreUtils>
 
 =head1 AUTHOR
 

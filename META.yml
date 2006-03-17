@@ -11,6 +11,10 @@ no_index:
     - inc
     - t
 requires: 
+  List::MoreUtils: 0
+  Module::Pluggable::Fast: 0
   Scalar::Util: 0
+  Sub::Exporter: 0
+  Sub::Install: 0
   perl: 5.6.1
-version: 0.02
+version: 0.03

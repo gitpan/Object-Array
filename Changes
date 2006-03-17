@@ -1,5 +1,9 @@
 Revision history for Object-Array
 
+0.03    Fri Mar 17 13:33:44 EST 2006
+
+        Plugins, include List::MoreUtils
+
 0.02    Fri Mar 17 10:51:52 EST 2006
 
         Make slices work.
