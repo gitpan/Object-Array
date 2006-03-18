@@ -27,8 +27,16 @@ is_deeply(
   'slice method get',
 );
 
+is $arr->join("."), "a.b.c", "join method";
+
 $arr->slice([ 2, 3 ], [ qw(f d) ]);
 is($arr->[2], 'f', 'deref get after slice method set');
+
+is(
+  $arr->grep(sub { $_ ne "a" })->join(", "),
+  "b, f, d",
+  "chained grep and join",
+);
 
 $arr->[2] = "c";
 

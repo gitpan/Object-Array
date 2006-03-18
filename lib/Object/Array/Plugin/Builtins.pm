@@ -20,6 +20,7 @@ use Sub::Exporter -setup => {
        splice
        map
        grep
+       join
      ),
   ],
 };
@@ -111,6 +112,8 @@ Erase the array.  The following all leave the array empty:
 
 =head2 C<< grep >>
 
+=head2 C<< join >>
+
 As the builtin array operations of the same names.
 
 Note that since map and grep are called as methods, you must
@@ -126,6 +129,11 @@ sub map {
 sub grep {
   my ($self, $code) = @_;
   return $self->_array(grep { $code->() } @{ $self });
+}
+
+sub join {
+  my $self = shift;
+  return join(shift, @{ $self });
 }
 
 sub size {

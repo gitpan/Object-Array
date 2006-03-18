@@ -1,5 +1,9 @@
 Revision history for Object-Array
 
+0.04    Sat Mar 18 09:24:37 EST 2006
+
+        Add 'join' method to Builtins
+
 0.03    Fri Mar 17 13:33:44 EST 2006
 
         Plugins, include List::MoreUtils
