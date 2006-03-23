@@ -12,9 +12,9 @@ no_index:
     - t
 requires: 
   List::MoreUtils: 0
-  Module::Pluggable::Fast: 0
+  Module::Pluggable: 0
   Scalar::Util: 0
   Sub::Exporter: 0
   Sub::Install: 0
   perl: 5.6.1
-version: 0.04
+version: 0.05

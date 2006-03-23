@@ -4,9 +4,7 @@ use strict;
 use warnings;
 use Scalar::Util ();
 
-use Module::Pluggable::Fast (
-  require => 1,
-);
+use Module::Pluggable (require => 1);
 
 for my $plugin (__PACKAGE__->plugins) {
   $plugin->import('-all');
@@ -24,11 +22,11 @@ Object::Array - array references with accessors
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 SYNOPSIS
 
@@ -83,6 +81,10 @@ $array >> also affect the original array object.  If you
 don't want that, copy the data first or use something like
 Storable's C<< dclone >>.
 
+=head2 C<< ref >>
+
+Returns a reference to the underlying array.
+
 =cut
 
 my %real;
@@ -90,6 +92,7 @@ my %real;
 sub _addr { Scalar::Util::refaddr($_[0]) }
 
 sub _real { $real{shift->_addr} }
+*ref = \&_real;
 
 sub _array {
   my ($self, @values) = @_;
@@ -101,14 +104,17 @@ sub _array_generator {
   my ($class) = @_;
   return sub { $class->new(@_) };
 }
+
+use overload (
+  q(@{})   => 'ref',
+  fallback => 1,
+);
   
 sub new {
   my $class = shift;
   my $real  = shift || [];
 
-  my @array;
-  my $self  = bless \@array => $class;
-  tie @array, $class."::Tie", $self;
+  my $self = bless \$real => $class;
   
   $real{$self->_addr} = $real;
 
@@ -171,26 +177,5 @@ This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =cut
-
-package Object::Array::Tie;
-
-sub TIEARRAY {
-  my ($class, $obj) = @_;
-  bless \$obj => $class;
-}
-
-sub FETCHSIZE { ${+shift}->size }
-sub STORESIZE { ${+shift}->size(shift) }
-sub STORE     { ${+shift}->elem(shift, shift) }
-sub FETCH     { ${+shift}->elem(shift) }
-sub CLEAR     { ${+shift}->clear }
-sub POP       { ${+shift}->pop }
-sub PUSH      { ${+shift}->push(@_) }
-sub SHIFT     { ${+shift}->shift }
-sub UNSHIFT   { ${+shift}->unshift(@_) }
-sub EXISTS    { ${+shift}->exists(shift) }
-sub DELETE    { ${+shift}->delete(shift) }
-sub SPLICE    { ${+shift}->splice(@_) }
-sub EXTEND    { () }
 
 1; # End of Object::Array

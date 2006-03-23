@@ -122,14 +122,16 @@ Currently these methods are not working:
 
 BEGIN {
   for my $util (@UTILS) {
-    no strict 'refs';
     Sub::Install::install_sub({
       as   => $util,
       code => sub {
         my $self = shift;
+        no strict 'refs';
+        # use $self->ref explicitly because List::MoreUtils
+        # segfaults otherwise (at least under 5.6.1) --
+        # probably unfriendliness with overloading
         &{"List::MoreUtils::$util"}(
-          @_,
-          $NEED_REF{$util} ? $self : @{ $self },
+          @_, $NEED_REF{$util} ? $self->ref : $self->elements,
         );
       },
     });

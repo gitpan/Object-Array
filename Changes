@@ -1,5 +1,20 @@
 Revision history for Object-Array
 
+0.05    Thu Mar 23 10:22:39 EST 2006
+
+        Remove extra tied array -- anyone who wants special
+        semantics can pass in a reference to a tied array.
+        Overloading is easier and makes some things work
+        that didn't before (from List::MoreUtils).
+
+0.04_02 Wed Mar 22 15:55:33 EST 2006
+
+        Use Module::Pluggable instead of ::Fast
+
+0.04_01 Wed Mar 22 15:40:48 EST 2006
+
+        Add 'ref' as alias for '_real' (should be public)
+
 0.04    Sat Mar 18 09:24:37 EST 2006
 
         Add 'join' method to Builtins
