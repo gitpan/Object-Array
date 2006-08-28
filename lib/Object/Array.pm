@@ -22,11 +22,11 @@ Object::Array - array references with accessors
 
 =head1 VERSION
 
-Version 0.05
+Version 0.060
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.060';
 
 =head1 SYNOPSIS
 
@@ -67,7 +67,7 @@ to the original object, and this sort of thing will be possible:
 
 =head1 METHODS
 
-=head2 C<< new >>
+=head2 new
 
   my $array = Object::Array->new;
   # or use existing array
@@ -81,7 +81,11 @@ $array >> also affect the original array object.  If you
 don't want that, copy the data first or use something like
 Storable's C<< dclone >>.
 
-=head2 C<< ref >>
+=head2 isa
+
+Overridden to respond to 'ARRAY'.
+
+=head2 ref
 
 Returns a reference to the underlying array.
 
@@ -119,6 +123,12 @@ sub new {
   $real{$self->_addr} = $real;
 
   return $self;
+}
+
+sub isa {
+  my ($class, $type) = @_;
+  return 1 if $type eq 'ARRAY';
+  return $class->SUPER::isa($type);
 }
 
 =head1 SEE ALSO

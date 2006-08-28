@@ -8,6 +8,7 @@ use Object::Array qw(Array);
 
 my $arr = Array;
 isa_ok($arr, 'Object::Array');
+isa_ok($arr, 'ARRAY');
 
 is $arr->size, 0, 'size method';
 is @{$arr}, 0, 'size deref';

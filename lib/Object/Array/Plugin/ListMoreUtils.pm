@@ -33,7 +33,7 @@ BEGIN {
 use List::MoreUtils ();
 use Sub::Install ();
 use Sub::Exporter -setup => {
-  exports => \@UTILS,
+  exports => [ @UTILS, 'contains' ],
 };
 
 my %NEED_REF = (
@@ -56,67 +56,64 @@ Add methods to Object::Array corresponding to functions from List::MoreUtils.
 
 See List::MoreUtils for details of these methods (functions).
 
-=head2 C<< any >>
+=head2 any
 
-=head2 C<< all >>
+=head2 all
 
-=head2 C<< none >>
+=head2 none
 
-=head2 C<< notall >>
+=head2 notall
 
-=head2 C<< true >>
+=head2 true
 
-=head2 C<< false >>
+=head2 false
 
-=head2 C<< firstidx >>
+=head2 firstidx
 
-=head2 C<< first_index >>
+=head2 first_index
 
-=head2 C<< lastidx >>
+=head2 lastidx
 
-=head2 C<< last_index >>
+=head2 last_index
 
-=head2 C<< insert_after >>
+=head2 insert_after
 
-=head2 C<< insert_after_string >>
+=head2 insert_after_string
 
-=head2 C<< apply >>
+=head2 apply
 
-=head2 C<< after >>
+=head2 after
 
-=head2 C<< after_incl >>
+=head2 after_incl
 
-=head2 C<< before >>
+=head2 before
 
-=head2 C<< before_incl >>
+=head2 before_incl
 
-=head2 C<< indexes >>
+=head2 indexes
 
-=head2 C<< firstval >>
+=head2 firstval
 
-=head2 C<< first_value >>
+=head2 first_value
 
-=head2 C<< lastval >>
+=head2 lastval
 
-=head2 C<< last_value >>
+=head2 last_value
 
-=head2 C<< natatime >>
+=head2 natatime
 
-=head2 C<< uniq >>
+=head2 uniq
 
-=head2 C<< minmax >>
+=head2 minmax
 
-=head1 BROKEN
+=head1 NEW METHODS
 
-Currently these methods are not working:
+=head2 contains
 
-=over
+  if ($arr->contains(1)) { ... }
 
-=item * insert_after
-
-=item * insert_after_string
-
-=back
+Convenient wrapper around firstidx.  Uses C<==> to compare
+references and numbers, C<eq> for everything else.
 
 =cut
 
@@ -136,6 +133,27 @@ BEGIN {
       },
     });
   }
+}
+
+sub _is_number {
+  my $val = shift;
+  # XXX horrible, but catches cases like 5 <=> "5.00"
+  use warnings FATAL => qw(numeric);
+  eval { $val = 0 + $val };
+  return $@ !~ /isn't numeric/;
+}
+
+sub contains {
+  my ($self, $value) = @_;
+  my $code;
+  if (not defined $value) {
+    $code = sub { not defined $_ };
+  } elsif (ref($value) || _is_number($value)) {
+    $code = sub { defined($_) && (ref($_) || _is_number($_)) && $_ == $value };
+  } else {
+    $code = sub { defined($_) && !ref($_) && $_ eq $value };
+  }
+  return $self->firstidx($code) != -1;
 }
 
 1;
